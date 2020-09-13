@@ -2,9 +2,11 @@
 
 namespace NotificationChannels\Pushover;
 
-use Illuminate\Notifications\Notification;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Notifications\Events\NotificationFailed;
+use Illuminate\Notifications\Notification;
+use NotificationChannels\Pushover\Exceptions\CouldNotSendNotification;
 use NotificationChannels\Pushover\Exceptions\ServiceCommunicationError;
 
 class PushoverChannel
@@ -18,25 +20,28 @@ class PushoverChannel
     /**
      * Create a new Pushover channel instance.
      *
-     * @param  Pushover $pushover
+     * @param Pushover   $pushover
+     * @param Dispatcher $events
      */
     public function __construct(Pushover $pushover, Dispatcher $events)
     {
         $this->pushover = $pushover;
-        $this->events = $events;
+        $this->events   = $events;
     }
 
     /**
      * Send the given notification.
      *
-     * @param mixed $notifiable
-     * @param \Illuminate\Notifications\Notification $notification
+     * @param mixed        $notifiable
+     * @param Notification $notification
      *
-     * @throws \NotificationChannels\Pushover\Exceptions\CouldNotSendNotification
+     * @return void
+     * @throws CouldNotSendNotification
+     * @throws GuzzleException
      */
-    public function send($notifiable, Notification $notification)
+    public function send($notifiable, Notification $notification): void
     {
-        if (! $pushoverReceiver = $notifiable->routeNotificationFor('pushover')) {
+        if (!$pushoverReceiver = $notifiable->routeNotificationFor('pushover')) {
             return;
         }
 
@@ -53,7 +58,14 @@ class PushoverChannel
         }
     }
 
-    protected function fireFailedEvent($notifiable, $notification, $message)
+    /**
+     * @param $notifiable
+     * @param $notification
+     * @param $message
+     *
+     * @return void
+     */
+    protected function fireFailedEvent($notifiable, $notification, $message): void
     {
         $this->events->fire(
             new NotificationFailed($notifiable, $notification, 'pushover', [$message])

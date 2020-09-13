@@ -2,6 +2,10 @@
 
 All notable changes to `pushover` will be documented in this file.
 
+## 2.0.1 - 2020-09-13
+- Updated to Guzzle 7 (necessary for Laravel 8 support)
+- Updated PHPDoc
+
 ## 2.0.0 - 2019-06-12
 - Add support for Laravel 5.8 (PR #30) 
 

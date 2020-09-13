@@ -13,10 +13,12 @@ class PushoverServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->app->when(PushoverChannel::class)
-            ->needs(Pushover::class)
-            ->give(function () {
-                return new Pushover(new HttpClient(), config('services.pushover.token'));
-            });
+                  ->needs(Pushover::class)
+                  ->give(
+                      function () {
+                          return new Pushover(new HttpClient(), config('services.pushover.token'));
+                      }
+                  );
     }
 
     /**

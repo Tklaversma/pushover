@@ -10,9 +10,10 @@ class PushoverReceiver
 
     /**
      * PushoverReceiver constructor.
-     * @param  $key  User or group key.
+     *
+     * @param string $key User or group key.
      */
-    protected function __construct($key)
+    protected function __construct(string $key)
     {
         $this->key = $key;
     }
@@ -20,10 +21,11 @@ class PushoverReceiver
     /**
      * Create new Pushover receiver with an user key.
      *
-     * @param  $userKey  Pushover user key.
+     * @param string $userKey Pushover user key.
+     *
      * @return PushoverReceiver
      */
-    public static function withUserKey($userKey)
+    public static function withUserKey(string $userKey)
     {
         return new static($userKey);
     }
@@ -31,10 +33,11 @@ class PushoverReceiver
     /**
      * Create new Pushover receiver with a group key.
      *
-     * @param  $groupKey  Pushover group key.
+     * @param string $groupKey Pushover group key.
+     *
      * @return PushoverReceiver
      */
-    public static function withGroupKey($groupKey)
+    public static function withGroupKey(string $groupKey)
     {
         // This has exactly the same behaviour as an user key, so we
         // will use the same factory method as for the user key.
@@ -44,16 +47,18 @@ class PushoverReceiver
     /**
      * Send the message to a specific device.
      *
-     * @param  array|string  $device
+     * @param array|string $device
+     *
      * @return PushoverReceiver
      */
-    public function toDevice($device)
+    public function toDevice($device): PushoverReceiver
     {
         if (is_array($device)) {
             $this->devices = array_merge($device, $this->devices);
 
             return $this;
         }
+
         $this->devices[] = $device;
 
         return $this;
@@ -62,10 +67,11 @@ class PushoverReceiver
     /**
      * Set the application token.
      *
-     * @param $token
+     * @param string $token
+     *
      * @return PushoverReceiver
      */
-    public function withApplicationToken($token)
+    public function withApplicationToken(string $token): PushoverReceiver
     {
         $this->token = $token;
 
@@ -77,11 +83,14 @@ class PushoverReceiver
      *
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
-        return array_merge([
-            'user' => $this->key,
-            'device' => implode(',', $this->devices),
-        ], $this->token ? ['token' => $this->token] : []);
+        return array_merge(
+            [
+                'user'   => $this->key,
+                'device' => implode(',', $this->devices),
+            ],
+            $this->token ? ['token' => $this->token] : []
+        );
     }
 }

@@ -75,37 +75,38 @@ class PushoverMessage
     /**
      * Message priorities.
      */
-    const LOWEST_PRIORITY = -2;
-    const LOW_PRIORITY = -1;
-    const NORMAL_PRIORITY = 0;
-    const HIGH_PRIORITY = 1;
-    const EMERGENCY_PRIORITY = 2;
+    public const LOWEST_PRIORITY    = -2;
+    public const LOW_PRIORITY       = -1;
+    public const NORMAL_PRIORITY    = 0;
+    public const HIGH_PRIORITY      = 1;
+    public const EMERGENCY_PRIORITY = 2;
 
     /**
-     * @param  string $content
-     *
-     * @return static
+     * @param string $content
      */
-    public static function create($content = '')
-    {
-        return new static($content);
-    }
-
-    /**
-     * @param  string  $content
-     */
-    public function __construct($content = '')
+    public function __construct(string $content = '')
     {
         $this->content = $content;
     }
 
     /**
+     * @param string $content
+     *
+     * @return static
+     */
+    public static function create(string $content = '')
+    {
+        return new static($content);
+    }
+
+    /**
      * Set the content of the Pushover message.
      *
-     * @param  string  $content
+     * @param string $content
+     *
      * @return $this
      */
-    public function content($content)
+    public function content(string $content)
     {
         $this->content = $content;
 
@@ -115,10 +116,11 @@ class PushoverMessage
     /**
      * Set the title of the Pushover message.
      *
-     * @param  string  $title
+     * @param string $title
+     *
      * @return $this
      */
-    public function title($title)
+    public function title(string $title)
     {
         $this->title = $title;
 
@@ -128,7 +130,8 @@ class PushoverMessage
     /**
      * Set the time of the Pushover message.
      *
-     * @param  Carbon|int  $time
+     * @param Carbon|int $time
+     *
      * @return $this
      */
     public function time($time)
@@ -145,13 +148,14 @@ class PushoverMessage
     /**
      * Set a supplementary url for the Pushover message.
      *
-     * @param  string $url
-     * @param  string $title
+     * @param string      $url
+     * @param string|null $title
+     *
      * @return $this
      */
-    public function url($url, $title = null)
+    public function url(string $url, ?string $title = null)
     {
-        $this->url = $url;
+        $this->url      = $url;
         $this->urlTitle = $title;
 
         return $this;
@@ -160,10 +164,11 @@ class PushoverMessage
     /**
      * Set the sound of the Pushover message.
      *
-     * @param  string  $sound
+     * @param string $sound
+     *
      * @return $this
      */
-    public function sound($sound)
+    public function sound(string $sound)
     {
         $this->sound = $sound;
 
@@ -174,18 +179,20 @@ class PushoverMessage
      * Set the priority of the Pushover message.
      * Retry and expire are mandatory when setting the priority to emergency.
      *
-     * @param  int  $priority
-     * @param  int  $retryTimeout
-     * @param  int  $expireAfter
+     * @param int      $priority
+     * @param int|null $retryTimeout
+     * @param int|null $expireAfter
+     *
      * @return $this
+     * @throws EmergencyNotificationRequiresRetryAndExpire
      */
-    public function priority($priority, $retryTimeout = null, $expireAfter = null)
+    public function priority(int $priority, ?int $retryTimeout = null, ?int $expireAfter = null)
     {
         $this->noEmergencyWithoutRetryOrExpire($priority, $retryTimeout, $expireAfter);
 
         $this->priority = $priority;
-        $this->retry = $retryTimeout;
-        $this->expire = $expireAfter;
+        $this->retry    = $retryTimeout;
+        $this->expire   = $expireAfter;
 
         return $this;
     }
@@ -194,6 +201,7 @@ class PushoverMessage
      * Set the priority of the Pushover message to the lowest priority.
      *
      * @return $this
+     * @throws EmergencyNotificationRequiresRetryAndExpire
      */
     public function lowestPriority()
     {
@@ -204,6 +212,7 @@ class PushoverMessage
      * Set the priority of the Pushover message to low.
      *
      * @return $this
+     * @throws EmergencyNotificationRequiresRetryAndExpire
      */
     public function lowPriority()
     {
@@ -214,6 +223,7 @@ class PushoverMessage
      * Set the priority of the Pushover message to normal.
      *
      * @return $this
+     * @throws EmergencyNotificationRequiresRetryAndExpire
      */
     public function normalPriority()
     {
@@ -224,6 +234,7 @@ class PushoverMessage
      * Set the priority of the Pushover message to high.
      *
      * @return $this
+     * @throws EmergencyNotificationRequiresRetryAndExpire
      */
     public function highPriority()
     {
@@ -234,9 +245,11 @@ class PushoverMessage
      * Set the priority of the Pushover message to emergency.
      * Retry and expire are mandatory when setting the priority to emergency.
      *
-     * @param  int  $retryTimeout
-     * @param  int  $expireAfter
+     * @param $retryTimeout
+     * @param $expireAfter
+     *
      * @return $this
+     * @throws EmergencyNotificationRequiresRetryAndExpire
      */
     public function emergencyPriority($retryTimeout, $expireAfter)
     {
@@ -248,32 +261,33 @@ class PushoverMessage
      *
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return [
-            'message' => $this->content,
-            'title' => $this->title,
+            'message'   => $this->content,
+            'title'     => $this->title,
             'timestamp' => $this->timestamp,
-            'priority' => $this->priority,
-            'url' => $this->url,
+            'priority'  => $this->priority,
+            'url'       => $this->url,
             'url_title' => $this->urlTitle,
-            'sound' => $this->sound,
-            'retry' => $this->retry,
-            'expire' => $this->expire,
+            'sound'     => $this->sound,
+            'retry'     => $this->retry,
+            'expire'    => $this->expire,
         ];
     }
 
     /**
      * Ensure an emergency message has an retry and expiry time.
      *
-     * @param  int  $priority
-     * @param  int  $retry
-     * @param  int  $expire
+     * @param int $priority
+     * @param int $retry
+     * @param int $expire
+     *
      * @throws EmergencyNotificationRequiresRetryAndExpire
      */
     protected function noEmergencyWithoutRetryOrExpire($priority, $retry, $expire)
     {
-        if ($priority == self::EMERGENCY_PRIORITY && (! isset($retry) || ! isset($expire))) {
+        if ($priority == self::EMERGENCY_PRIORITY && (!isset($retry) || !isset($expire))) {
             throw new EmergencyNotificationRequiresRetryAndExpire();
         }
     }
